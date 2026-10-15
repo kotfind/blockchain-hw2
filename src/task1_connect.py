@@ -61,9 +61,9 @@ class Network:
 
 # source: https://docs.infura.io/get-started/endpoints#ethereum
 Network.LIST.extend([
-    Network("Mainnet", "https://mainnet.infura.io/v3"),
-    Network("Hoodi", "https://hoodi.infura.io/v3"),
     Network("Sepolia", "https://sepolia.infura.io/v3"),
+    Network("Hoodi", "https://hoodi.infura.io/v3"),
+    Network("Mainnet", "https://mainnet.infura.io/v3"),
     # TODO: ganache
 ])
 
