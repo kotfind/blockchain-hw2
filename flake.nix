@@ -17,6 +17,7 @@
       python = pkgs.python3.withPackages (pypkgs:
         with pypkgs; [
           web3
+          beaupy
         ]);
 
       shell = mkShell {
