@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import ClassVar
 
+from beaupy import prompt
 from eth_account.signers.local import LocalAccount
 from rich import print as rprint
 from web3 import Web3
@@ -98,13 +99,32 @@ class EthUnit:
     An amount of Wei in a single Eth.
     """
 
+    WEI_IN_GWEI: ClassVar[int] = 10**9
+    """
+    An amount of Wei in a single GWei.
+    """
+
+
     @classmethod
     def from_wei(cls, wei: int) -> EthUnit:
         return cls(wei)
 
+    @classmethod
+    def from_gwei(cls, gwei: int) -> EthUnit:
+        return cls(gwei * cls.WEI_IN_GWEI)
+
+    @classmethod
+    def pick(cls) -> EthUnit:
+        """
+        Interacts with user to get an amount of WEI.
+        """
+
+        wei = prompt("[bold]Enter an amount of WEI:[/bold]", target_type=int)
+        return cls.from_wei(wei)
+
     def to_wei(self) -> int:
         """
-        Covnerts to Wei.
+        Converts to Wei.
         """
 
         return self.wei
