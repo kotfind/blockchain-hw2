@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import ClassVar
 
+from eth_account.signers.local import LocalAccount
 from rich import print as rprint
 from web3 import Web3
 from web3.types import BlockData
@@ -124,6 +125,11 @@ class Account:
     An Etherium account.
     """
 
+    acc: LocalAccount
+    """
+    An inner account.
+    """
+
     addr: str
     """
     An account address.
@@ -134,18 +140,32 @@ class Account:
     An account key.
     """
 
+    @classmethod
+    def from_key(cls, con: Connection, key: str) -> Account:
+        """
+        Creates an account from a key.
+        """
+
+        acc = con.w3.eth.account.from_key(key)
+        addr = acc.address
+
+        return Account(acc, addr, key)
+
     def get_balance(self, con: Connection) -> EthUnit:
+        """
+        Returns account's balance.
+        """
+
         wei = con.w3.eth.get_balance(self.addr) # ty: ignore
         return EthUnit.from_wei(wei)
 
 if __name__ == "__main__":
     api_key = os.environ["INFURA_API_KEY"]
-    acc1_addr = os.environ["ACC1_ADDR"]
     acc1_key = os.environ["ACC1_KEY"]
 
     net = Network.from_name("Sepolia")
     con = Connection.connect(net, api_key)
-    acc1 = Account(acc1_addr, acc1_key)
+    acc1 = Account.from_key(con, acc1_key)
 
     rprint(f"[bold]Block height: {con.get_block_number()}[/bold]")
 
