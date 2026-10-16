@@ -143,7 +143,7 @@ if __name__ == "__main__":
     acc1_addr = os.environ["ACC1_ADDR"]
     acc1_key = os.environ["ACC1_KEY"]
 
-    net = Network.pick()
+    net = Network.from_name("Sepolia")
     con = Connection.connect(net, api_key)
     acc1 = Account(acc1_addr, acc1_key)
 
@@ -159,5 +159,5 @@ if __name__ == "__main__":
         "[/bold]")
 
     balance = acc1.get_balance(con)
-    rprint(f"[bold]Balance on {acc1.addr}: {balance.to_wei()} WEI = {balance.to_eth_float():.5g} ETH[/bold]")
+    rprint(f"[bold]Balance on {acc1.addr}:\n  {balance.to_wei()} WEI = {balance.to_eth_float():.5g} ETH[/bold]")
 

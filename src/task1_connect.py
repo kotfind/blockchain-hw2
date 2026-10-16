@@ -39,7 +39,24 @@ class Network:
         return self.name
 
     @classmethod
+    def from_name(cls, name: str) -> Network:
+        """
+        Returns a network this `LIST` with a given name.
+        """
+
+        for net in cls.LIST:
+            if net.name == name:
+                return net
+
+        rprint(f"[bold red]Failed to find a network called `{name}`[/bold red]")
+        exit(1)
+
+    @classmethod
     def pick(cls) -> Network:
+        """
+        Shows a dialog to pick a network from the `LIST`.
+        """
+
         rprint("[bold]Pick a network to connect to:[/bold]")
 
         choice = select(cast(list[str | Network], cls.LIST))
@@ -48,6 +65,10 @@ class Network:
         return choice
 
     def connect(self, api_key: str) -> Web3:
+        """
+        Connects to the current network.
+        """
+
         url = f"{self.url}/{api_key}"
         w3 = Web3(HTTPProvider(url))
 
