@@ -53,6 +53,7 @@
           [python]
           ++ (with pkgs; [
             solc
+            foundry
           ]);
       };
     in {

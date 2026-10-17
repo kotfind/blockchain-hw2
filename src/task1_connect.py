@@ -32,7 +32,7 @@ class Network:
     """
     A RPC url.
 
-    Does NOT contain an API key.
+    May contain an {api_key} placeholder.
     """
 
     def __str__(self):
@@ -69,7 +69,7 @@ class Network:
         Connects to the current network.
         """
 
-        url = f"{self.url}/{api_key}"
+        url = self.url.replace("{api_key}", api_key)
         w3 = Web3(HTTPProvider(url))
 
         if w3.is_connected():
@@ -83,10 +83,11 @@ class Network:
 # source: https://docs.infura.io/get-started/endpoints#ethereum
 Network.LIST.extend(
     [
-        Network("Sepolia", "https://sepolia.infura.io/v3"),
-        Network("Hoodi", "https://hoodi.infura.io/v3"),
-        Network("Mainnet", "https://mainnet.infura.io/v3"),
-        # TODO: ganache
+        Network("Sepolia", "https://sepolia.infura.io/v3/{api_key}"),
+        Network("Hoodi", "https://hoodi.infura.io/v3/{api_key}"),
+        Network("Mainnet", "https://mainnet.infura.io/v3/{api_key}"),
+        # Apparently ganache is deprecated, so I decided to use Anvil
+        Network("Anvil", "http://localhost:8545"),
     ]
 )
 
