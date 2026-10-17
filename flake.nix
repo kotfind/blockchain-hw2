@@ -2,8 +2,10 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    py-solc-x-src.url = "github:ApeWorX/py-solc-x/v2.0.5";
-    py-solc-x-src.flake = false;
+    py-solc-x-src = {
+      url = "github:ApeWorX/py-solc-x/v2.0.5";
+      flake = false;
+    };
   };
 
   outputs = {
