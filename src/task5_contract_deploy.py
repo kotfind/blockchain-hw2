@@ -23,7 +23,12 @@ class SmartContract:
     A smart contract.
     """
 
-    bytecode: bytes
+    addr: str | None
+    """
+    A contract address.
+    """
+
+    bytecode: bytes | None
     """
     A bytecode.
     """
@@ -48,26 +53,34 @@ class SmartContract:
         output = compiled[output_name]
 
         return cls(
+            addr=None,
             bytecode=Web3.to_bytes(hexstr=output["bin"]),
             abi=output["abi"],
         )
 
-    def to_deploy_tx_data(self, con: Connection, ctor_args: list[object]) -> bytes:
-        """
-        Returns bytes to be sent in transaction's `data` field to deploy contract.
-        """
-
+    def deploy(self, con: Connection, acc: Account, ctor_args: list[object]) -> None:
         ctor = self._get_contract(con).constructor(*ctor_args)
-        data_str = ctor.data_in_transaction
+        tx_data_str = ctor.data_in_transaction
+        tx_data = Web3.to_bytes(hexstr=tx_data_str)
 
-        return Web3.to_bytes(hexstr=data_str)
+        tx_new = TxNew(acc1, data=tx_data)
+        tx_res = tx_new.send(con)
+
+        self.addr = tx_res.contract_addr
+        rprint(f"[bold green]Deployed contract: {self.addr}[/bold green]")
 
     def _get_contract(self, con: Connection) -> Type[Contract]:
         """
         Returns an internal contract representation.
         """
 
-        return con.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
+        if self.addr is not None:
+            return con.w3.eth.contract(address=self.addr, abi=self.abi)  # type: ignore
+        elif self.bytecode is not None:
+            return con.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
+        else:
+            rprint("[bold red]A contract hase neither bytecode, nor address[/bold red]")
+            exit(1)
 
 
 if __name__ == "__main__":
@@ -79,9 +92,4 @@ if __name__ == "__main__":
     acc1 = Account.from_key(con, acc1_key)
 
     contract = SmartContract.compile(CUR_DIR / "task5_math.sol", "task5_math")
-    contract_tx_data = contract.to_deploy_tx_data(con, [])
-
-    tx_new = TxNew(acc1, data=contract_tx_data)
-    tx_res = tx_new.send(con)
-
-    rprint(f"[bold green]Deployed contract: {tx_res.contract_addr}[/bold green]")
+    contract.deploy(con, acc1, [])
