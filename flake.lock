@@ -32,10 +32,28 @@
         "type": "indirect"
       }
     },
+    "py-solc-x-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1765382851,
+        "narHash": "sha256-jQnx39XjyAYPsx4B4A6glkzie1qaheybJCO5I52GyEo=",
+        "owner": "ApeWorX",
+        "repo": "py-solc-x",
+        "rev": "d80edcb5a0b49beca65ef0760503ff806628b358",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ApeWorX",
+        "ref": "v2.0.5",
+        "repo": "py-solc-x",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "py-solc-x-src": "py-solc-x-src"
       }
     },
     "systems": {

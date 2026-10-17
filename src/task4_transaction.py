@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from sys import exit
 
 from beaupy import confirm
 from rich import print as rprint
+from web3 import Web3
 from web3.types import TxParams
 
 from task1_connect import Network
@@ -25,12 +26,12 @@ class TxNew:
     A sender account.
     """
 
-    to_addr: str
+    to_addr: str | None = None
     """
     A receiver address.
     """
 
-    amount: EthUnit
+    amount: EthUnit = field(default_factory=lambda: EthUnit.from_wei(0))
     """
     An amount of Eth to send.
     """
@@ -38,6 +39,11 @@ class TxNew:
     gasLimit: int | None = None
     """
     A maximum amount of gas to spend on a transaction.
+    """
+
+    data: bytes | None = None
+    """
+    A transaction data.
     """
 
     def send(self, con: Connection) -> TxRes:
@@ -51,35 +57,30 @@ class TxNew:
         priority_fee = con.w3.eth.max_priority_fee
         max_fee = int(base_fee * 1.5 + priority_fee)
 
-        if self.gasLimit is None:
-            gas = con.w3.eth.estimate_gas(
-                TxParams(
-                    {
-                        "from": self.from_acc.addr,
-                        "to": self.to_addr,
-                        "value": self.amount.to_wei(),  # pyright: ignore
-                    }
-                )
-            )
-
-            rprint(f"[bold]Estimated gas: {gas}[/bold]")
-        else:
-            gas = self.gasLimit
-
         tx_data = {
             "from": self.from_acc.addr,
-            "to": self.to_addr,
             "value": self.amount.to_wei(),
-            "gas": gas,
             "nonce": nonce,
             "maxFeePerGas": max_fee,
             "maxPriorityFeePerGas": priority_fee,
             "chainId": con.w3.eth.chain_id,
         }
 
+        if self.to_addr is not None:
+            tx_data["to"] = self.to_addr
+
+        if self.data is not None:
+            tx_data["data"] = Web3.to_hex(self.data)
+
+        if self.gasLimit is not None:
+            tx_data["gas"] = self.gasLimit
+        else:
+            tx_data["gas"] = con.w3.eth.estimate_gas(TxParams(**tx_data))
+            rprint(f"[bold]Estimated gas: {tx_data['gas']}[/bold]")
+
         tx_signed = con.w3.eth.account.sign_transaction(tx_data, self.from_acc.key)
         tx_hash_bytes = con.w3.eth.send_raw_transaction(tx_signed.raw_transaction)
-        tx_hash = f"0x{tx_hash_bytes.hex()}"
+        tx_hash = Web3.to_hex(tx_hash_bytes)
         rprint(f"[bold]Formed transaction {tx_hash}[/bold]")
 
         receipt = con.w3.eth.wait_for_transaction_receipt(tx_hash_bytes)
@@ -90,7 +91,7 @@ class TxNew:
 
         rprint(f"[bold green]Transaction {tx_hash} succeeded[/bold green]")
 
-        return TxRes(self, tx_hash, receipt["blockNumber"])
+        return TxRes(self, tx_hash, receipt["blockNumber"], receipt["contractAddress"])
 
 
 @dataclass
@@ -112,6 +113,11 @@ class TxRes:
     block_number: int
     """
     A number of block with the current transaction.
+    """
+
+    contract_addr: str | None
+    """
+    An address of a deployed contract.
     """
 
 
