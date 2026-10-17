@@ -11,10 +11,10 @@ from web3 import Web3
 from web3.contract import Contract
 
 from task1_connect import Network
-from task3_interraction import Account, Connection, EthUnit
+from task3_interraction import Account, Connection
 from task4_transaction import TxNew
 
-CUR_DIR: Path = Path(__file__).parent
+ROOT: Path = Path(__file__).parents[1]
 
 
 @dataclass
@@ -99,7 +99,7 @@ class SmartContract:
 
         return value
 
-    def _get_contract(self, con: Connection) -> Contract:
+    def _get_contract(self, con: Connection) -> type[Contract]:
         """
         Returns an internal contract representation.
         """
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     con = Connection.connect(net, api_key)
     acc1 = Account.from_key(con, acc1_key)
 
-    contract = SmartContract.compile(CUR_DIR / "task5_math.sol", "task5_math")
+    contract = SmartContract.compile(ROOT / "src" / "task5_math.sol", "task5_math")
     contract.deploy(con, acc1, [])
 
     rprint(f"[bold]orig value = {contract.get(con, "res")}[/bold]")
