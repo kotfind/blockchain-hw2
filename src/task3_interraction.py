@@ -54,6 +54,7 @@ class Connection:
         block = self.w3.eth.get_block(ident)
         return BlockInfo.from_block(block)
 
+
 @dataclass
 class BlockInfo:
     """
@@ -78,10 +79,13 @@ class BlockInfo:
     @classmethod
     def from_block(cls, block: BlockData) -> BlockInfo:
         return cls(
-            number=block.number, # ty: ignore
-            hash=block.hash.hex(), # ty: ignore
-            time=datetime.fromtimestamp(block.timestamp, tz=timezone.utc) # ty: ignore
+            number=block["number"],  # pyright: ignore
+            hash=block["hash"].hex(),  # pyright: ignore
+            time=datetime.fromtimestamp(
+                block["timestamp"], tz=timezone.utc  # pyright: ignore
+            ),
         )
+
 
 @dataclass
 class EthUnit:
@@ -103,7 +107,6 @@ class EthUnit:
     """
     An amount of Wei in a single GWei.
     """
-
 
     @classmethod
     def from_wei(cls, wei: int) -> EthUnit:
@@ -176,8 +179,9 @@ class Account:
         Returns account's balance.
         """
 
-        wei = con.w3.eth.get_balance(self.addr) # ty: ignore
+        wei = con.w3.eth.get_balance(self.addr)  # pyright: ignore
         return EthUnit.from_wei(wei)
+
 
 if __name__ == "__main__":
     api_key = os.environ["INFURA_API_KEY"]
@@ -196,8 +200,10 @@ if __name__ == "__main__":
         f"  Number: {info.number}\n"
         f"  Hash: {info.hash}\n"
         f"  Time: {info.time.astimezone().isoformat()}"
-        "[/bold]")
+        "[/bold]"
+    )
 
     balance = acc1.get_balance(con)
-    rprint(f"[bold]Balance on {acc1.addr}:\n  {balance.to_wei()} WEI = {balance.to_eth_float():.5g} ETH[/bold]")
-
+    rprint(
+        f"[bold]Balance on {acc1.addr}:\n  {balance.to_wei()} WEI = {balance.to_eth_float():.5g} ETH[/bold]"
+    )

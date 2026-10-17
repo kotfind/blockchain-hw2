@@ -45,18 +45,22 @@ class TxNew:
         Sends the current transaction.
         """
 
-        nonce = con.w3.eth.get_transaction_count(self.from_acc.addr) # ty: ignore
+        nonce = con.w3.eth.get_transaction_count(self.from_acc.addr)  # pyright: ignore
 
-        base_fee = con.w3.eth.get_block("pending").baseFeePerGas # ty: ignore
+        base_fee = con.w3.eth.get_block("pending").baseFeePerGas  # pyright: ignore
         priority_fee = con.w3.eth.max_priority_fee
         max_fee = int(base_fee * 1.5 + priority_fee)
 
         if self.gasLimit is None:
-            gas = con.w3.eth.estimate_gas(TxParams({
-                "from": self.from_acc.addr,
-                "to": self.to_addr,
-                "value": self.amount.to_wei(), # ty: ignore
-            }))
+            gas = con.w3.eth.estimate_gas(
+                TxParams(
+                    {
+                        "from": self.from_acc.addr,
+                        "to": self.to_addr,
+                        "value": self.amount.to_wei(),  # pyright: ignore
+                    }
+                )
+            )
 
             rprint(f"[bold]Estimated gas: {gas}[/bold]")
         else:
@@ -66,7 +70,6 @@ class TxNew:
             "from": self.from_acc.addr,
             "to": self.to_addr,
             "value": self.amount.to_wei(),
-
             "gas": gas,
             "nonce": nonce,
             "maxFeePerGas": max_fee,
@@ -87,11 +90,8 @@ class TxNew:
 
         rprint(f"[bold green]Transaction {tx_hash} succeeded[/bold green]")
 
-        return TxRes(
-            self,
-            tx_hash,
-            receipt["blockNumber"]
-        )
+        return TxRes(self, tx_hash, receipt["blockNumber"])
+
 
 @dataclass
 class TxRes:
@@ -114,6 +114,7 @@ class TxRes:
     A number of block with the current transaction.
     """
 
+
 if __name__ == "__main__":
     api_key = os.environ["INFURA_API_KEY"]
     acc1_key = os.environ["ACC1_KEY"]
@@ -126,7 +127,9 @@ if __name__ == "__main__":
     amount = EthUnit.pick()
     tx_new = TxNew(acc1, acc2_addr, amount)
 
-    if not confirm(f"[bold]Do you want to send {amount.to_wei()} WEI from {acc1.addr} to {acc2_addr}[/bold]"):
+    if not confirm(
+        f"[bold]Do you want to send {amount.to_wei()} WEI from {acc1.addr} to {acc2_addr}[/bold]"
+    ):
         rprint("[bold red]Confirmation failed[/bold red]")
         exit(1)
 
