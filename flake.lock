@@ -53,7 +53,24 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
-        "py-solc-x-src": "py-solc-x-src"
+        "py-solc-x-src": "py-solc-x-src",
+        "solidity-language-server-src": "solidity-language-server-src"
+      }
+    },
+    "solidity-language-server-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789443783,
+        "narHash": "sha256-qruozA40OHGNnH3YjIgFaG5OKLYkdhFE0vc/jsB3Uws=",
+        "owner": "asyncswap",
+        "repo": "solidity-language-server",
+        "rev": "77f9b2d7680f1c8e32bee429c1451c328bcd6cac",
+        "type": "github"
+      },
+      "original": {
+        "owner": "asyncswap",
+        "repo": "solidity-language-server",
+        "type": "github"
       }
     },
     "systems": {
