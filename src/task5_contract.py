@@ -3,10 +3,12 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Type
 
 import solcx
 from rich import print as rprint
 from web3 import Web3
+from web3.contract import Contract
 
 from task1_connect import Network
 from task3_interraction import Account, Connection, EthUnit
@@ -19,11 +21,6 @@ CUR_DIR: Path = Path(__file__).parent
 class SmartContract:
     """
     A smart contract.
-    """
-
-    source: str
-    """
-    A solidity source code.
     """
 
     bytecode: bytes
@@ -51,20 +48,26 @@ class SmartContract:
         output = compiled[output_name]
 
         return cls(
-            source=file.read_text(),
             bytecode=Web3.to_bytes(hexstr=output["bin"]),
             abi=output["abi"],
         )
 
-    def to_tx_data(self, con: Connection, ctor_args: list[object]) -> bytes:
+    def to_deploy_tx_data(self, con: Connection, ctor_args: list[object]) -> bytes:
         """
         Returns bytes to be sent in transaction's `data` field to deploy contract.
         """
 
-        contract = con.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
-        data_hex = contract.constructor(*ctor_args).data_in_transaction
+        ctor = self._get_contract(con).constructor(*ctor_args)
+        data_str = ctor.data_in_transaction
 
-        return Web3.to_bytes(hexstr=data_hex)
+        return Web3.to_bytes(hexstr=data_str)
+
+    def _get_contract(self, con: Connection) -> Type[Contract]:
+        """
+        Returns an internal contract representation.
+        """
+
+        return con.w3.eth.contract(abi=self.abi, bytecode=self.bytecode)
 
 
 if __name__ == "__main__":
@@ -76,7 +79,7 @@ if __name__ == "__main__":
     acc1 = Account.from_key(con, acc1_key)
 
     contract = SmartContract.compile(CUR_DIR / "task5_math.sol", "task5_math")
-    contract_tx_data = contract.to_tx_data(con, [])
+    contract_tx_data = contract.to_deploy_tx_data(con, [])
 
     tx_new = TxNew(acc1, data=contract_tx_data)
     tx_res = tx_new.send(con)
